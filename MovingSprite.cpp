@@ -3,3 +3,8 @@
 //
 
 #include "MovingSprite.h"
+
+MovingSprite::MovingSprite(QColor color, bool canBeEaten) {
+    this->color = color;
+    this->canBeEaten = canBeEaten;
+}

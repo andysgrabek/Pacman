@@ -8,7 +8,11 @@
 #include "MovingSprite.h"
 
 class Ghost: public MovingSprite {
-
+public:
+    explicit Ghost(const QColor& color, void moveStrategy(), bool canBeEaten = false);
+    void move() override;
+private:
+    void (*moveStrategy)();
 };
 
 

@@ -25,10 +25,11 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    void loadMapFromFile();
+    void loadGame();
+    bool isBoundaryWall(std::pair<unsigned long, unsigned long> cell);
     std::vector<std::string> map;
     std::pair<unsigned long, unsigned long> mapSize;
-    std::map<std::string, MovingSprite> sprites;
+    std::map<std::string, MovingSprite*> sprites;
 };
 
 #endif //TASK8_PACMAN_PACMANBOARD_H

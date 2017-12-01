@@ -9,6 +9,10 @@
 
 class Pacman: public MovingSprite {
 
+public:
+    explicit Pacman(const QColor& color, bool canBeEaten = false): MovingSprite(color, canBeEaten) {}
+    void move() override;
+
 };
 
 

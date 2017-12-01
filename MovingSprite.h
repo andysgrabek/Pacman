@@ -6,9 +6,19 @@
 #define TASK8_PACMAN_MOVINGSPRITE_H
 
 
+#include <QtGui/QColor>
+
 class MovingSprite {
 
+protected:
+    explicit MovingSprite(QColor color, bool canBeEaten = false);
+    virtual ~MovingSprite() = default;
+    QColor color;
+    std::pair<unsigned long, unsigned long> startingCell = {0, 0};
 
+public:
+    bool canBeEaten;
+    virtual void move() = 0;
 };
 
 
