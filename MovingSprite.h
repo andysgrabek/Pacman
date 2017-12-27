@@ -7,18 +7,23 @@
 
 
 #include <QtGui/QColor>
+#include <QRect>
+#include <vector>
+#include <QRegion>
+#include <QGraphicsPixmapItem>
 
-class MovingSprite {
-
+class MovingSprite: public QRect {
 protected:
-    explicit MovingSprite(QColor color, bool canBeEaten = false);
+    explicit MovingSprite(QRect r, const std::string &color);
     virtual ~MovingSprite() = default;
-    QColor color;
-    std::pair<unsigned long, unsigned long> startingCell = {0, 0};
-
+    std::string color;
 public:
-    bool canBeEaten;
-    virtual void move() = 0;
+    void move();
+    bool canMaintainCurrentDirection(const QRegion& walls);
+    std::pair<short, short> currentDirection = {0, 1};
+    std::pair<short, short> nextDirection = {0, 1};
+    void setNextDirection(std::pair<short, short> direction);
+    virtual void changeDirection(const QRegion& walls) = 0;
 };
 
 

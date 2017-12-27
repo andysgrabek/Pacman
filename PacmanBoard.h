@@ -5,31 +5,55 @@
 #ifndef TASK8_PACMAN_PACMANBOARD_H
 #define TASK8_PACMAN_PACMANBOARD_H
 
+#include <QtGui/QPainter>
 #include <QWidget>
 #include <vector>
-#include "MovingSprite.h"
+#include <QKeyEvent>
+#include <QTimer>
+#include <QMainWindow>
+#include "Pacman.h"
+#include "Ghost.h"
 
-class PacmanBoard: public QWidget {
+class PacmanBoard: public QMainWindow {
 
 Q_OBJECT
 
 public:
     PacmanBoard(QWidget *parent = nullptr); //NOLINT
+    ~PacmanBoard() override;
 
 public slots:
-    void paintBoard(QPaintEvent *event = nullptr);
+    void moveSprites();
+    void invertEatability();
 
 signals:
 
 protected:
     void paintEvent(QPaintEvent *event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
 private:
+    std::list<MovingSprite*> createSpritesArray();
+    std::list<MovingSprite*> sprites;
+    int smallDotsEaten = 0;
+    int bigDotsEaten = 0;
+    std::list<QRect> smallDots;
+    std::list<QRect> bigDots;
+    QRegion walls;
+    std::vector<Ghost> ghosts;
     void loadGame();
-    bool isBoundaryWall(std::pair<unsigned long, unsigned long> cell);
+    void addObjects();
     std::vector<std::string> map;
     std::pair<unsigned long, unsigned long> mapSize;
-    std::map<std::string, MovingSprite*> sprites;
+    QTimer *gameTimer;
+    QTimer *eatTimer;
+    Pacman pacman;
+    bool didHitSmallDot();
+    bool didHitBigDot();
+    void passThroughBoundary(MovingSprite *sprite);
+    void redirectAndMove(MovingSprite *sprite);
+    void collectDot();
+    void checkVictoryCondition();
 };
 
 #endif //TASK8_PACMAN_PACMANBOARD_H

@@ -8,11 +8,10 @@
 #include "MovingSprite.h"
 
 class Pacman: public MovingSprite {
-
 public:
-    explicit Pacman(const QColor& color, bool canBeEaten = false): MovingSprite(color, canBeEaten) {}
-    void move() override;
-
+    bool canBeEaten;
+    explicit Pacman(QRect r, const std::string& color, bool canBeEaten = true);
+    void changeDirection(const QRegion& walls) override;
 };
 
 
