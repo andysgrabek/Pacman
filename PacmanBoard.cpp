@@ -11,62 +11,57 @@
 #define UP_PAIR std::pair<short, short>(0, -1)
 #define DOWN_PAIR std::pair<short, short>(0, 1)
 #define NONE_PAIR std::pair<short, short>(0, 0)
-#define INITIAL_DELAY 2000
-#define EAT_TIME 10000
 #define FPS 60
 #define DELAY (1000 / FPS)
+#define MOUTH_CHANGE_INTERVAL 200
 #define CELL_WIDTH 25
 #define STANDARD_CELL column * CELL_WIDTH, row * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH
 #define SMALL_DOT_CELL column * CELL_WIDTH + CELL_WIDTH / 2, row * CELL_WIDTH + CELL_WIDTH / 2, CELL_WIDTH / 8, CELL_WIDTH / 8
 #define BIG_DOT_CELL column * CELL_WIDTH + CELL_WIDTH / 2 - CELL_WIDTH / 16, row * CELL_WIDTH + CELL_WIDTH / 2 - CELL_WIDTH / 16, CELL_WIDTH / 4, CELL_WIDTH / 4
 
-int counter = 0;
-
 PacmanBoard::PacmanBoard(QWidget *parent): pacman(QRect(), "yellow") {
     gameTimer = new QTimer(this);
-    eatTimer = new QTimer(this);
+    mouthTimer = new QTimer(this);
     loadGame();
     connect(gameTimer, SIGNAL(timeout()), this, SLOT(moveSprites()));
-    connect(eatTimer, SIGNAL(timeout()), this, SLOT(invertEatability()));
-    gameTimer->start(INITIAL_DELAY);
+    connect(mouthTimer, SIGNAL(timeout()), this, SLOT(changePacmanMouth()));
     addObjects();
     sprites = createSpritesArray();
-
+    gameTimer->start(DELAY);
+    mouthTimer->start(MOUTH_CHANGE_INTERVAL);
 }
 
 void PacmanBoard::paintEvent(QPaintEvent *event) {
     QWidget::paintEvent(event);
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
-        QPainterPath path;
-        path.addRegion(walls);
-        QPen pen(Qt::darkBlue, 0);
-        p.setPen(pen);
-        p.fillPath(path, Qt::darkBlue);
-        p.drawPath(path);
-    for (auto smallDot: smallDots) {
+
+    QPainterPath path;
+    path.addRegion(walls);
+    QPen pen(Qt::darkBlue, 0);
+    p.setPen(pen);
+    p.fillPath(path, Qt::darkBlue);
+    p.drawPath(path);
+
+    for (auto& smallDot: smallDots) {
         QPainterPath path;
         path.addEllipse(smallDot);
         QPen pen(Qt::darkMagenta, 2);
         p.setPen(pen);
         p.drawPath(path);
     }
-    for (auto bigDot: bigDots) {
+
+    for (auto& bigDot: bigDots) {
         QPainterPath path;
         path.addEllipse(bigDot);
         QPen pen(Qt::darkCyan, 3);
         p.setPen(pen);
         p.drawPath(path);
     }
-    for (const auto &ghost: ghosts) {
-        p.drawImage(ghost, ghost.getSprite().scaled(CELL_WIDTH, CELL_WIDTH));
-    }
 
-    QPainterPath path2;
-    path2.addEllipse(pacman);
-    QPen pen2(Qt::yellow, 4);
-    p.setPen(pen2);
-    p.drawPath(path2);
+    for (auto sprite: sprites) {
+        p.drawImage(*sprite, sprite->getSprite().scaled(CELL_WIDTH, CELL_WIDTH));
+    }
 
 }
 
@@ -84,7 +79,6 @@ void PacmanBoard::moveSprites() {
     }
     collectDot();
     checkVictoryCondition();
-    gameTimer->start(DELAY);
     update();
 }
 
@@ -150,12 +144,10 @@ bool PacmanBoard::didHitBigDot() {
         if (t.intersects(bigDot)) {
             bigDots.remove(bigDot);
             if (pacman.canBeEaten) {
-                invertEatability();
-                eatTimer->start(EAT_TIME);
+                pacman.canBeEaten = false;
             }
-            else {
-                eatTimer->stop();
-                eatTimer->start(EAT_TIME);
+            for (auto& ghost: ghosts) {
+                ghost.prolongEating();
             }
             return true;
         }
@@ -174,12 +166,8 @@ bool PacmanBoard::didHitSmallDot() {
     return false;
 }
 
-void PacmanBoard::invertEatability() {
-    pacman.canBeEaten = !pacman.canBeEaten;
-}
-
 PacmanBoard::~PacmanBoard() {
-    delete eatTimer;
+    delete mouthTimer;
     delete gameTimer;
 }
 
@@ -210,12 +198,10 @@ void PacmanBoard::redirectAndMove(MovingSprite *sprite) {
 
 void PacmanBoard::collectDot() {
     if (didHitSmallDot()) {
-        std::cout << "Small dots: " << smallDots.size() << '\n';
-        ++smallDotsEaten;
+        std::clog << "Small dots: " << smallDots.size() << '\n';
     }
     else if (didHitBigDot()) {
-        std::cout << "Big dots: " << bigDots.size() << '\n';
-        ++bigDotsEaten;
+        std::clog << "Big dots: " << bigDots.size() << '\n';
     }
 }
 
@@ -224,7 +210,15 @@ void PacmanBoard::checkVictoryCondition() {
         exit(2);
     }
     for (auto& ghost: ghosts) {
-        if (ghost.intersects(pacman) && pacman.canBeEaten)
-            exit(3);
+        if (ghost.intersects(pacman)) {
+            if (pacman.canBeEaten)
+                exit(3);
+            else
+                ghost.startRetreat();
+        }
     }
+}
+
+void PacmanBoard::changePacmanMouth() {
+    pacman.switchMouthMode();
 }

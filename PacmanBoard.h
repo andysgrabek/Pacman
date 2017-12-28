@@ -24,7 +24,7 @@ public:
 
 public slots:
     void moveSprites();
-    void invertEatability();
+    void changePacmanMouth();
 
 signals:
 
@@ -35,8 +35,6 @@ protected:
 private:
     std::list<MovingSprite*> createSpritesArray();
     std::list<MovingSprite*> sprites;
-    int smallDotsEaten = 0;
-    int bigDotsEaten = 0;
     std::list<QRect> smallDots;
     std::list<QRect> bigDots;
     QRegion walls;
@@ -46,7 +44,7 @@ private:
     std::vector<std::string> map;
     std::pair<unsigned long, unsigned long> mapSize;
     QTimer *gameTimer;
-    QTimer *eatTimer;
+    QTimer *mouthTimer;
     Pacman pacman;
     bool didHitSmallDot();
     bool didHitBigDot();

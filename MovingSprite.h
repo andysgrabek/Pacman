@@ -13,15 +13,20 @@
 #include <QGraphicsPixmapItem>
 
 class MovingSprite: public QRect {
+
 protected:
     explicit MovingSprite(QRect r, const std::string &color);
     virtual ~MovingSprite() = default;
     std::string color;
+    std::pair<short, short> speed = {1, 1};
+    std::map<int, QImage> sprites;
 public:
+    virtual QImage getSprite() const = 0;
     void move();
+    bool canBeEaten;
     bool canMaintainCurrentDirection(const QRegion& walls);
     std::pair<short, short> currentDirection = {0, 1};
-    std::pair<short, short> nextDirection = {0, 1};
+    std::pair<short, short> nextDirection = {1, 0};
     void setNextDirection(std::pair<short, short> direction);
     virtual void changeDirection(const QRegion& walls) = 0;
 };

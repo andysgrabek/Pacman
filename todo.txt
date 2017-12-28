@@ -1,6 +1,4 @@
-change colors when eatable
-start blinking when eating period ending
-change direction and have random behaviour when running
-return to middle when being eaten
-have the corners as initial target places
-timers for ghosts exiting
+allow velocities
+blink when ending eating
+do not reenter nest if not in retreat mode
+pathfinding in retreat mode
