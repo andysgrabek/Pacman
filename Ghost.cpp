@@ -17,63 +17,76 @@
 #define WAIT_TIME 2000
 #define EAT_TIME 10000
 
-//700, 725
 enum MODE {
-    ATTACK, DEPLOY, RETREAT, RUN, EXIT, RUN_BLINK
+    ATTACK, DEPLOY, RETREAT, RUN, EXIT
 };
 
 enum COLOR {
     CYAN, PINK, RED, YELLOW
 };
 
-Ghost::Ghost(QRect r, const std::string &color, MovingSprite *pacman) : MovingSprite(r, color) {
+Ghost::Ghost(QRect r, int color, MovingSprite *pacman) : MovingSprite(r, color) {
     this->pacman = pacman;
-    speed = {0, 0};
     internalTimer = new QTimer();
     internalTimer->setSingleShot(true);
 
     QString path("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/");
-    path.append(color.c_str());
+    switch (color) {
+        case PINK:
+            path.append("pink");
+            break;
+        case RED:
+            path.append("red");
+            break;
+        case CYAN:
+            path.append("cyan");
+            break;
+        case YELLOW:
+            path.append("yellow");
+            break;
+        default:
+            break;
+    }
     sprites[ATTACK].load(path);
     sprites[RETREAT].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/eyes.png");
     sprites[RUN].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/grey.png");
-//    sprites[RUN_BLINK].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/white.png");
 
     mode = EXIT;
     restoreInitialDirection();
     exitSquare = {350, 275};
     originalPosition = topLeft();
-    if (color == "red") {
+    if (color == RED) {
         targetCorner = QPoint(25, 700);
         internalTimer->start(WAIT_TIME);
     }
-    else if (color == "cyan") {
+    else if (color == CYAN) {
         targetCorner = QPoint(50, 50);
         internalTimer->start(WAIT_TIME * 2);
     }
-    else if (color == "pink") {
+    else if (color == PINK) {
         targetCorner = QPoint(700, 25);
         internalTimer->start(WAIT_TIME * 3);
     }
-    else if (color == "yellow") {
+    else if (color == YELLOW) {
         targetCorner = QPoint(700, 700);
         internalTimer->start(WAIT_TIME * 4);
     }
+    retreatTarget = exitSquare;
 }
 
 void Ghost::restoreInitialDirection() {
     if (topLeft().x() < 375) {
-        currentDirection = nextDirection = {1, 0};
+        currentDirection = nextDirection = RIGHT_PAIR;
     }
     else {
-        currentDirection = nextDirection = {-1, 0};
+        currentDirection = nextDirection = LEFT_PAIR;
     }
 }
 
-void Ghost::changeDirection(const QRegion& walls) {
+void Ghost::changeDirection(const QRegion &walls, const QRegion &gate) {
 
     std::list<std::pair<short, short>> possibleDirections;
-    calculatePossibleDirections(possibleDirections, walls);
+    calculatePossibleDirections(possibleDirections, walls, gate);
     bool foundUp = findDirection(possibleDirections, UP_PAIR);
     bool foundDown = findDirection(possibleDirections, DOWN_PAIR);
     bool foundLeft = findDirection(possibleDirections, LEFT_PAIR);
@@ -91,35 +104,40 @@ void Ghost::changeDirection(const QRegion& walls) {
                 mode = ATTACK;
             break;
         case ATTACK:
-            if (color == "red" || color == "yellow" || color == "pink") {
+            if (color == RED || color == YELLOW || color == PINK) {
                 resolveDirectionOverCommonAxisTowards(pacman->topLeft(), foundDown, foundLeft, foundRight, possibleDirections,
                                                       foundUp);
                 vector = {std::begin(possibleDirections), std::end(possibleDirections)};
                 int isWithinPinkOffset = (topLeft() - pacman->topLeft()).manhattanLength() <= PINK_OFFSET;
-                if (color == "red" || (color == "pink" && isWithinPinkOffset)) {
+                if (color == RED || (color == PINK && isWithinPinkOffset)) {
                     resolveDirection(vector, vectorOfML, pacman->topLeft());
                 }
-                else if (color == "pink") {
+                else if (color == PINK) {
                     resolveDirection(vector, vectorOfML, {CELL_WIDTH, CELL_WIDTH});
                 }
-                else if (color == "yellow") {
+                else if (color == YELLOW) {
                     resolveDirection(vector, vectorOfML, QPoint(pacman->currentDirection.first * GRAY_OFFSET, pacman->currentDirection.second * GRAY_OFFSET));
                 }
             }
-            else if (color == "cyan") {
+            else if (color == CYAN) {
                 chooseRandomDirection(possibleDirections);
             }
             break;
         case RETREAT:
-            resolveDirectionOverCommonAxisTowards(originalPosition, foundDown, foundLeft, foundRight, possibleDirections,
+            resolveDirectionOverCommonAxisTowards(retreatTarget, foundDown, foundLeft, foundRight, possibleDirections,
                                                   foundUp);
             vector = {std::begin(possibleDirections), std::end(possibleDirections)};
-            resolveDirection(vector, vectorOfML, originalPosition);
+            resolveDirection(vector, vectorOfML, retreatTarget);
             if (topLeft() == originalPosition) {
                 mode = EXIT;
+                speed = 1;
+                shouldMove = false;
                 restoreInitialDirection();
-                speed = {0, 0};
                 internalTimer->start(WAIT_TIME);
+            }
+            if (topLeft() == exitSquare) {
+                retreatTarget = originalPosition;
+                nextDirection = DOWN_PAIR;
             }
             break;
         case RUN:
@@ -139,7 +157,7 @@ void Ghost::changeDirection(const QRegion& walls) {
                 internalTimer->start(DEPLOY_TIME);
             }
             if (!internalTimer->isActive())
-                speed = {1, 1};
+                shouldMove = true;
             break;
         default:
             break;
@@ -178,27 +196,34 @@ void Ghost::resolveDirection(const std::vector<std::pair<short, short>> &vector,
     }
 }
 
-void Ghost::calculatePossibleDirections(std::list<std::pair<short, short>> &possibleDirections, const QRegion &walls) {
+void Ghost::calculatePossibleDirections(std::list<std::pair<short, short>> &possibleDirections, const QRegion &walls,
+                                        const QRegion &gate) {
     possibleDirections.insert(possibleDirections.begin(), DOWN_PAIR);
     possibleDirections.insert(possibleDirections.begin(), RIGHT_PAIR);
     possibleDirections.insert(possibleDirections.begin(), UP_PAIR);
     possibleDirections.insert(possibleDirections.begin(), LEFT_PAIR);
     possibleDirections.remove({currentDirection.first * -1, currentDirection.second * -1});
 
+    QRegion r;
+    if (mode == EXIT || mode == RETREAT)
+        r = walls;
+    else
+        r = walls.united(gate);
+
     QRect t = translated(DOWN_PAIR.first, DOWN_PAIR.second);
-    if (walls.intersects(t))
+    if (r.intersects(t))
         possibleDirections.remove(DOWN_PAIR);
 
     t = translated(RIGHT_PAIR.first, RIGHT_PAIR.second);
-    if (walls.intersects(t))
+    if (r.intersects(t))
         possibleDirections.remove(RIGHT_PAIR);
 
     t = translated(UP_PAIR.first, UP_PAIR.second);
-    if (walls.intersects(t))
+    if (r.intersects(t))
         possibleDirections.remove(UP_PAIR);
 
     t = translated(LEFT_PAIR.first, LEFT_PAIR.second);
-    if (walls.intersects(t))
+    if (r.intersects(t))
         possibleDirections.remove(LEFT_PAIR);
 }
 
@@ -239,6 +264,8 @@ void Ghost::prolongEating() {
 
 void Ghost::startRetreat() {
     mode = RETREAT;
+    speed = 5;
+    retreatTarget = exitSquare;
 }
 
 QImage Ghost::getSprite() const {
@@ -251,4 +278,12 @@ QImage Ghost::getSprite() const {
     else {
         return sprites.at(ATTACK);
     }
+}
+
+bool Ghost::canMaintainCurrentDirection(const QRegion &walls, const QRegion &gate) {
+    QRegion t(translated(currentDirection.first, currentDirection.second));
+    if (mode == RETREAT || mode == EXIT) {
+        return !t.intersects(walls);
+    }
+    return !t.intersects(walls.united(gate));
 }

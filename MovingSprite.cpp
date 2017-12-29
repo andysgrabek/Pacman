@@ -5,13 +5,8 @@
 #include <iostream>
 #include "MovingSprite.h"
 
-MovingSprite::MovingSprite(QRect r, const std::string &color) : QRect(r) {
+MovingSprite::MovingSprite(QRect r, const int color) : QRect(r) {
     this->color = color;
-}
-
-bool MovingSprite::canMaintainCurrentDirection(const QRegion& walls) {
-    QRegion t(translated(currentDirection.first, currentDirection.second));
-    return !t.intersects(walls);
 }
 
 void MovingSprite::setNextDirection(std::pair<short, short> direction) {
@@ -19,5 +14,6 @@ void MovingSprite::setNextDirection(std::pair<short, short> direction) {
 }
 
 void MovingSprite::move() {
-    translate(currentDirection.first * speed.first, currentDirection.second * speed.second);
+    if (shouldMove)
+        translate(currentDirection.first, currentDirection.second);
 }

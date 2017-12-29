@@ -38,6 +38,7 @@ private:
     std::list<QRect> smallDots;
     std::list<QRect> bigDots;
     QRegion walls;
+    QRegion gate;
     std::vector<Ghost> ghosts;
     void loadGame();
     void addObjects();

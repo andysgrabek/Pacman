@@ -10,18 +10,20 @@
 class Ghost: public MovingSprite {
 
 public:
-    explicit Ghost(QRect r, const std::string &color, MovingSprite *pacman);
-    void changeDirection(const QRegion& walls) override;
+    explicit Ghost(QRect r, int color, MovingSprite *pacman);
+    void changeDirection(const QRegion &walls, const QRegion &gate) override;
     int mode;
     void prolongEating();
     void startRetreat();
     QImage getSprite() const override;
+    bool canMaintainCurrentDirection(const QRegion &walls, const QRegion &gate) override;
 private:
+    QPoint retreatTarget;
     QPoint targetCorner;
     QPoint exitSquare;
     QPoint originalPosition;
     MovingSprite* pacman;
-    void calculatePossibleDirections(std::list<std::pair<short, short>> &possibleDirections, const QRegion &walls);
+    void calculatePossibleDirections(std::list<std::pair<short, short>> &possibleDirections, const QRegion &walls, const QRegion &gate);
     bool findDirection(std::list<std::pair<short, short>> &possibleDirections, std::pair<short, short> dir);
     void resolveDirectionOverCommonAxisTowards(QPoint target, bool foundDown, bool foundLeft, bool foundRight,
                                                std::list<std::pair<short, short>> &, bool foundUp);

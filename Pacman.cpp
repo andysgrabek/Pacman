@@ -9,18 +9,18 @@
 #define UP_PAIR std::pair<short, short>(0, -1)
 #define DOWN_PAIR std::pair<short, short>(0, 1)
 
-Pacman::Pacman(QRect r, const std::string& color, bool canBeEaten): MovingSprite(r, color) {
+Pacman::Pacman(QRect r, int color, bool canBeEaten): MovingSprite(r, color) {
     nextDirection = RIGHT_PAIR;
-    speed = {1, 1};
+    shouldMove = true;
     this->canBeEaten = canBeEaten;
     sprites[OPEN].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/pacmanOpen.png");
     sprites[CLOSED].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/pacmanClosed.png");
 }
 
-void Pacman::changeDirection(const QRegion& walls) {
+void Pacman::changeDirection(const QRegion &walls, const QRegion &gate) {
     if (currentDirection != std::pair<short, short>(0, 0)) {
         QRect t = translated(nextDirection.first, nextDirection.second);
-        if (walls.intersects(t)) {
+        if (walls.united(gate).intersects(t)) {
             return;
         }
         currentDirection = nextDirection;
@@ -52,4 +52,9 @@ void Pacman::switchMouthMode() {
     else {
         mouthMode = OPEN;
     }
+}
+
+bool Pacman::canMaintainCurrentDirection(const QRegion &walls, const QRegion &gate) {
+    QRegion t(translated(currentDirection.first, currentDirection.second));
+    return !t.intersects(walls.united(gate));
 }

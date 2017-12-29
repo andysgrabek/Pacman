@@ -19,7 +19,11 @@
 #define SMALL_DOT_CELL column * CELL_WIDTH + CELL_WIDTH / 2, row * CELL_WIDTH + CELL_WIDTH / 2, CELL_WIDTH / 8, CELL_WIDTH / 8
 #define BIG_DOT_CELL column * CELL_WIDTH + CELL_WIDTH / 2 - CELL_WIDTH / 16, row * CELL_WIDTH + CELL_WIDTH / 2 - CELL_WIDTH / 16, CELL_WIDTH / 4, CELL_WIDTH / 4
 
-PacmanBoard::PacmanBoard(QWidget *parent): pacman(QRect(), "yellow") {
+enum COLOR {
+    CYAN, PINK, RED, YELLOW
+};
+
+PacmanBoard::PacmanBoard(QWidget *parent): pacman(QRect(), YELLOW) {
     gameTimer = new QTimer(this);
     mouthTimer = new QTimer(this);
     loadGame();
@@ -96,20 +100,22 @@ void PacmanBoard::addObjects() {
                     bigDots.emplace_back(BIG_DOT_CELL);
                     break;
                 case 'a':
-                    ghosts.emplace_back(QRect(STANDARD_CELL), "red", &pacman);
+                    ghosts.emplace_back(QRect(STANDARD_CELL), RED, &pacman);
                     break;
                 case 'b':
-                    ghosts.emplace_back(QRect(STANDARD_CELL), "cyan", &pacman);
+                    ghosts.emplace_back(QRect(STANDARD_CELL), CYAN, &pacman);
                     break;
                 case 'c':
-                    ghosts.emplace_back(QRect(STANDARD_CELL), "yellow", &pacman);
+                    ghosts.emplace_back(QRect(STANDARD_CELL), YELLOW, &pacman);
                     break;
                 case 'd':
-                    ghosts.emplace_back(QRect(STANDARD_CELL), "pink", &pacman);
+                    ghosts.emplace_back(QRect(STANDARD_CELL), PINK, &pacman);
                     break;
                 case 'p':
                     pacman.setRect(STANDARD_CELL);
                     break;
+                case 'w':
+                    gate = QRect(STANDARD_CELL);
                 default:
                     break;
             }
@@ -181,18 +187,20 @@ std::list<MovingSprite *> PacmanBoard::createSpritesArray() {
 }
 
 void PacmanBoard::passThroughBoundary(MovingSprite *sprite) {
-    if (sprite->x() >= size().width() && sprite->currentDirection == RIGHT_PAIR)
-        sprite->moveLeft(0);
+    if (sprite->x() == size().width() - CELL_WIDTH / 2&& sprite->currentDirection == RIGHT_PAIR)
+        sprite->moveLeft(-CELL_WIDTH / 2);
 
-    if (sprite->x() <= -CELL_WIDTH && sprite->currentDirection == LEFT_PAIR)
-        sprite->moveLeft(size().width() + CELL_WIDTH);
+    if (sprite->x() <= -CELL_WIDTH / 2 && sprite->currentDirection == LEFT_PAIR)
+        sprite->moveLeft(size().width() - CELL_WIDTH / 2);
 }
 
 void PacmanBoard::redirectAndMove(MovingSprite *sprite) {
-    if (sprite->nextDirection != NONE_PAIR)
-        sprite->changeDirection(walls);
-    if (sprite->canMaintainCurrentDirection(walls)) {
-        sprite->move();
+    for(int i = 0; i < sprite->speed; ++i) {
+        if (sprite->nextDirection != NONE_PAIR)
+            sprite->changeDirection(walls, gate);
+        if (sprite->canMaintainCurrentDirection(walls, gate)) {
+            sprite->move();
+        }
     }
 }
 
@@ -211,7 +219,7 @@ void PacmanBoard::checkVictoryCondition() {
     }
     for (auto& ghost: ghosts) {
         if (ghost.intersects(pacman)) {
-            if (pacman.canBeEaten)
+            if (pacman.canBeEaten && ghost.mode != 2)//2 == RETREAT
                 exit(3);
             else
                 ghost.startRetreat();

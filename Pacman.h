@@ -13,10 +13,11 @@ enum MOUTH_MODE {
 
 class Pacman: public MovingSprite {
 public:
-    explicit Pacman(QRect r, const std::string& color, bool canBeEaten = true);
-    void changeDirection(const QRegion& walls) override;
+    explicit Pacman(QRect r, int color, bool canBeEaten = true);
+    void changeDirection(const QRegion &walls, const QRegion &gate) override;
     QImage getSprite() const override;
     void switchMouthMode();
+    bool canMaintainCurrentDirection(const QRegion &walls, const QRegion &gate) override;
 private:
     int mouthMode = OPEN;
 };

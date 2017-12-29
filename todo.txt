@@ -1,4 +1,2 @@
 allow velocities
-blink when ending eating
-do not reenter nest if not in retreat mode
-pathfinding in retreat mode
+do not reenter nest if not in retreat mode -- collision with "wall"
