@@ -4,27 +4,22 @@
 
 #include "Pacman.h"
 #include <cmath>
-#define LEFT_PAIR std::pair<short, short>(-1, 0)
-#define RIGHT_PAIR std::pair<short, short>(1, 0)
-#define UP_PAIR std::pair<short, short>(0, -1)
-#define DOWN_PAIR std::pair<short, short>(0, 1)
 
 Pacman::Pacman(QRect r, int color, bool canBeEaten): MovingSprite(r, color) {
     nextDirection = RIGHT_PAIR;
     shouldMove = true;
     this->canBeEaten = canBeEaten;
-    sprites[OPEN].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/pacmanOpen.png");
-    sprites[CLOSED].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/pacmanClosed.png");
+    loadSprites();
 }
 
 void Pacman::changeDirection(const QRegion &walls, const QRegion &gate) {
-    if (currentDirection != std::pair<short, short>(0, 0)) {
+    if (currentDirection != NONE_PAIR) {
         QRect t = translated(nextDirection.first, nextDirection.second);
         if (walls.united(gate).intersects(t)) {
             return;
         }
         currentDirection = nextDirection;
-        nextDirection = {0, 0};
+        nextDirection = NONE_PAIR;
     }
 }
 
@@ -57,4 +52,15 @@ void Pacman::switchMouthMode() {
 bool Pacman::canMaintainCurrentDirection(const QRegion &walls, const QRegion &gate) {
     QRegion t(translated(currentDirection.first, currentDirection.second));
     return !t.intersects(walls.united(gate));
+}
+
+void Pacman::loadSprites() {
+    try {
+        sprites[OPEN].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/pacmanOpen.png");
+        sprites[CLOSED].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/pacmanClosed.png");
+    }
+    catch (...) {
+        abort();
+    }
+
 }

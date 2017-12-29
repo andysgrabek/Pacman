@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_CXX_FLAGS "-Wall -pedantic -Werror")
 
-set(SOURCE_FILES main.cpp map.txt PacmanBoard.cpp PacmanBoard.h MovingSprite.cpp MovingSprite.h Ghost.cpp Ghost.h Pacman.cpp Pacman.h)
+set(SOURCE_FILES main.cpp map.txt PacmanBoard.cpp PacmanBoard.h MovingSprite.cpp MovingSprite.h Ghost.cpp Ghost.h Pacman.cpp Pacman.h pacman_constants.h)
 
 set(CMAKE_AUTOMOC ON)
 

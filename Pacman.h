@@ -20,6 +20,7 @@ public:
     bool canMaintainCurrentDirection(const QRegion &walls, const QRegion &gate) override;
 private:
     int mouthMode = OPEN;
+    void loadSprites() override;
 };
 
 

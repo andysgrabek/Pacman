@@ -53,6 +53,10 @@ private:
     void redirectAndMove(MovingSprite *sprite);
     void collectDot();
     void checkVictoryCondition();
+
+    void drawDot(QPainter &p, const QRect &bigDot, QColor color, int thickness) const;
+
+    void drawWalls(QPainter &p) const;
 };
 
 #endif //TASK8_PACMAN_PACMANBOARD_H

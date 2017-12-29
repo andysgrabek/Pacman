@@ -6,23 +6,6 @@
 #include <iostream>
 #include "PacmanBoard.h"
 
-#define LEFT_PAIR std::pair<short, short>(-1, 0)
-#define RIGHT_PAIR std::pair<short, short>(1, 0)
-#define UP_PAIR std::pair<short, short>(0, -1)
-#define DOWN_PAIR std::pair<short, short>(0, 1)
-#define NONE_PAIR std::pair<short, short>(0, 0)
-#define FPS 60
-#define DELAY (1000 / FPS)
-#define MOUTH_CHANGE_INTERVAL 200
-#define CELL_WIDTH 25
-#define STANDARD_CELL column * CELL_WIDTH, row * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH
-#define SMALL_DOT_CELL column * CELL_WIDTH + CELL_WIDTH / 2, row * CELL_WIDTH + CELL_WIDTH / 2, CELL_WIDTH / 8, CELL_WIDTH / 8
-#define BIG_DOT_CELL column * CELL_WIDTH + CELL_WIDTH / 2 - CELL_WIDTH / 16, row * CELL_WIDTH + CELL_WIDTH / 2 - CELL_WIDTH / 16, CELL_WIDTH / 4, CELL_WIDTH / 4
-
-enum COLOR {
-    CYAN, PINK, RED, YELLOW
-};
-
 PacmanBoard::PacmanBoard(QWidget *parent): pacman(QRect(), YELLOW) {
     gameTimer = new QTimer(this);
     mouthTimer = new QTimer(this);
@@ -39,41 +22,46 @@ void PacmanBoard::paintEvent(QPaintEvent *event) {
     QWidget::paintEvent(event);
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
+    drawWalls(p);
+    for (auto& smallDot: smallDots)
+        drawDot(p, smallDot, Qt::darkMagenta, 2);
+    for (auto& bigDot: bigDots)
+        drawDot(p, bigDot, Qt::darkCyan, 3);
+    for (auto sprite: sprites)
+        p.drawImage(*sprite, sprite->getSprite().scaled(CELL_WIDTH, CELL_WIDTH));
+}
 
+void PacmanBoard::drawWalls(QPainter &p) const {
     QPainterPath path;
     path.addRegion(walls);
     QPen pen(Qt::darkBlue, 0);
     p.setPen(pen);
     p.fillPath(path, Qt::darkBlue);
     p.drawPath(path);
+    QPen gatePen(Qt::darkGreen, 4);
+    p.setPen(gatePen);
+    p.drawLine(gate.boundingRect().translated(0, CELL_WIDTH / 4).topLeft(), gate.boundingRect().translated(0, CELL_WIDTH / 4).topRight());
+}
 
-    for (auto& smallDot: smallDots) {
-        QPainterPath path;
-        path.addEllipse(smallDot);
-        QPen pen(Qt::darkMagenta, 2);
-        p.setPen(pen);
-        p.drawPath(path);
-    }
-
-    for (auto& bigDot: bigDots) {
-        QPainterPath path;
-        path.addEllipse(bigDot);
-        QPen pen(Qt::darkCyan, 3);
-        p.setPen(pen);
-        p.drawPath(path);
-    }
-
-    for (auto sprite: sprites) {
-        p.drawImage(*sprite, sprite->getSprite().scaled(CELL_WIDTH, CELL_WIDTH));
-    }
-
+void PacmanBoard::drawDot(QPainter &p, const QRect &bigDot, QColor color, int thickness) const {
+    QPainterPath path;
+    path.addEllipse(bigDot);
+    QPen pen(color, thickness);
+    p.setPen(pen);
+    p.drawPath(path);
 }
 
 void PacmanBoard::loadGame() {
-    std::ifstream file("map.txt");
-    for (std::string n; file >> n;)
-        map.push_back(n);
-    file.close();
+    try {
+        std::ifstream file("map.txt");
+        for (std::string n; file >> n;)
+            map.push_back(n);
+        file.close();
+    }
+    catch (...) {
+        abort();
+    }
+
 }
 
 void PacmanBoard::moveSprites() {
@@ -189,7 +177,6 @@ std::list<MovingSprite *> PacmanBoard::createSpritesArray() {
 void PacmanBoard::passThroughBoundary(MovingSprite *sprite) {
     if (sprite->x() == size().width() - CELL_WIDTH / 2&& sprite->currentDirection == RIGHT_PAIR)
         sprite->moveLeft(-CELL_WIDTH / 2);
-
     if (sprite->x() <= -CELL_WIDTH / 2 && sprite->currentDirection == LEFT_PAIR)
         sprite->moveLeft(size().width() - CELL_WIDTH / 2);
 }
@@ -219,7 +206,7 @@ void PacmanBoard::checkVictoryCondition() {
     }
     for (auto& ghost: ghosts) {
         if (ghost.intersects(pacman)) {
-            if (pacman.canBeEaten && ghost.mode != 2)//2 == RETREAT
+            if (pacman.canBeEaten && ghost.mode != RETREAT)
                 exit(3);
             else
                 ghost.startRetreat();
