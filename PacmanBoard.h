@@ -19,7 +19,7 @@ class PacmanBoard: public QMainWindow {
 Q_OBJECT
 
 public:
-    PacmanBoard(QWidget *parent = nullptr); //NOLINT
+    explicit PacmanBoard(QWidget  __unused *parent = nullptr);
     ~PacmanBoard() override;
 
 public slots:
@@ -27,6 +27,8 @@ public slots:
     void changePacmanMouth();
 
 signals:
+    void scoreIncreased(int value);
+    void textChanged(QString text);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -40,23 +42,24 @@ private:
     QRegion walls;
     QRegion gate;
     std::vector<Ghost> ghosts;
-    void loadGame();
-    void addObjects();
+    Pacman pacman;
     std::vector<std::string> map;
-    std::pair<unsigned long, unsigned long> mapSize;
     QTimer *gameTimer;
     QTimer *mouthTimer;
-    Pacman pacman;
+    void loadGame();
+    void addObjects();
     bool didHitSmallDot();
     bool didHitBigDot();
     void passThroughBoundary(MovingSprite *sprite);
     void redirectAndMove(MovingSprite *sprite);
     void collectDot();
     void checkVictoryCondition();
-
     void drawDot(QPainter &p, const QRect &bigDot, QColor color, int thickness) const;
-
     void drawWalls(QPainter &p) const;
+
+    void clearGame();
+
+    void startNewGame();
 };
 
 #endif //TASK8_PACMAN_PACMANBOARD_H

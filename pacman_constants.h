@@ -8,6 +8,12 @@
 #define CELL_WIDTH 25
 #define GRAY_OFFSET 100
 #define PINK_OFFSET 200
+#define SMALL_DOTS 280
+#define BIG_DOTS 8
+
+#define GAME_TEXT "Arrows to steer, ESC to exit"
+#define LOST_TEXT "You lost, ESC to exit, ENTER to restart"
+#define WIN_TEXT "You won, ESC to exit, ENTER to restart"
 
 #define FPS 40
 #define DELAY (1000 / FPS)
@@ -25,7 +31,6 @@
 #define EXIT_SQUARE {350, 275}
 #define BOARD_SIZE_X 725
 #define BOARD_SIZE_Y 725
-
 
 #define DEPLOY_TIME 3000
 #define WAIT_TIME 1500

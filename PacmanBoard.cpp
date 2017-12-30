@@ -1,4 +1,4 @@
-//
+#include <climits>//
 // Created by andys on 01.12.17.
 //
 
@@ -6,16 +6,21 @@
 #include <iostream>
 #include "PacmanBoard.h"
 
-PacmanBoard::PacmanBoard(QWidget *parent): pacman(QRect(), YELLOW) {
+PacmanBoard::PacmanBoard(QWidget __unused *parent): pacman(QRect(), YELLOW) {
     gameTimer = new QTimer(this);
     mouthTimer = new QTimer(this);
     loadGame();
     connect(gameTimer, SIGNAL(timeout()), this, SLOT(moveSprites()));
     connect(mouthTimer, SIGNAL(timeout()), this, SLOT(changePacmanMouth()));
+    startNewGame();
+}
+
+void PacmanBoard::startNewGame() {
     addObjects();
     sprites = createSpritesArray();
     gameTimer->start(DELAY);
-    mouthTimer->start(MOUTH_CHANGE_INTERVAL);
+    mouthTimer->start(MOUTH_CHANGE_INTERVAL);emit
+    textChanged("Arrows to steer, ESC to exit");
 }
 
 void PacmanBoard::paintEvent(QPaintEvent *event) {
@@ -75,6 +80,7 @@ void PacmanBoard::moveSprites() {
 }
 
 void PacmanBoard::addObjects() {
+    clearGame();
     for (unsigned int column = 0; column < map.at(0).size(); ++column) {
         for (unsigned int row = 0; row < map.size(); ++row) {
             switch (map[row][column]) {
@@ -111,6 +117,15 @@ void PacmanBoard::addObjects() {
     }
 }
 
+void PacmanBoard::clearGame() {
+    sprites = std::list<MovingSprite*>();
+    smallDots = std::list<QRect>();
+    bigDots = std::list<QRect>();
+    walls = QRegion();
+    gate = QRegion();
+    ghosts = std::vector<Ghost>();
+}
+
 void PacmanBoard::keyPressEvent(QKeyEvent *event) {
     switch (event->key()) {
         case Qt::Key_Down:
@@ -127,6 +142,10 @@ void PacmanBoard::keyPressEvent(QKeyEvent *event) {
             break;
         case Qt::Key_Escape:
             exit(1);
+        case Qt::Key_Return:
+            if (!gameTimer->isActive())
+                startNewGame();
+            break;
         default:
             break;
     }
@@ -175,7 +194,7 @@ std::list<MovingSprite *> PacmanBoard::createSpritesArray() {
 }
 
 void PacmanBoard::passThroughBoundary(MovingSprite *sprite) {
-    if (sprite->x() == size().width() - CELL_WIDTH / 2&& sprite->currentDirection == RIGHT_PAIR)
+    if (sprite->x() == size().width() - CELL_WIDTH / 2 && sprite->currentDirection == RIGHT_PAIR)
         sprite->moveLeft(-CELL_WIDTH / 2);
     if (sprite->x() <= -CELL_WIDTH / 2 && sprite->currentDirection == LEFT_PAIR)
         sprite->moveLeft(size().width() - CELL_WIDTH / 2);
@@ -192,24 +211,25 @@ void PacmanBoard::redirectAndMove(MovingSprite *sprite) {
 }
 
 void PacmanBoard::collectDot() {
-    if (didHitSmallDot()) {
-        std::clog << "Small dots: " << smallDots.size() << '\n';
-    }
-    else if (didHitBigDot()) {
-        std::clog << "Big dots: " << bigDots.size() << '\n';
-    }
+    if (didHitSmallDot() || didHitBigDot())
+        emit scoreIncreased(static_cast<int>(SMALL_DOTS - smallDots.size() + 5 * (BIG_DOTS - bigDots.size())));
 }
 
 void PacmanBoard::checkVictoryCondition() {
     if (bigDots.empty() && smallDots.empty()) {
-        exit(2);
+        gameTimer->stop();
+        emit textChanged(QString(WIN_TEXT));;
     }
     for (auto& ghost: ghosts) {
         if (ghost.intersects(pacman)) {
-            if (pacman.canBeEaten && ghost.mode != RETREAT)
-                exit(3);
-            else
+            if (pacman.canBeEaten && ghost.mode != RETREAT) {
+                gameTimer->stop();
+                emit textChanged(QString(LOST_TEXT));
+                //exit(3);
+            }
+            else {
                 ghost.startRetreat();
+            }
         }
     }
 }
