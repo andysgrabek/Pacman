@@ -56,8 +56,8 @@ bool Pacman::canMaintainCurrentDirection(const QRegion &walls, const QRegion &ga
 
 void Pacman::loadSprites() {
     try {
-        sprites[OPEN].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/pacmanOpen.png");
-        sprites[CLOSED].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/pacmanClosed.png");
+        sprites[OPEN].load(QString(CUR_PATH).append("pacmanOpen.png"));
+        sprites[CLOSED].load(QString(CUR_PATH).append("pacmanClosed.png"));
     }
     catch (...) {
         abort();

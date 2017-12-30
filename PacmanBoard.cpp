@@ -58,7 +58,7 @@ void PacmanBoard::drawDot(QPainter &p, const QRect &bigDot, QColor color, int th
 
 void PacmanBoard::loadGame() {
     try {
-        std::ifstream file("map.txt");
+        std::ifstream file(std::string(CUR_PATH).append("map.txt"));
         for (std::string n; file >> n;)
             map.push_back(n);
         file.close();

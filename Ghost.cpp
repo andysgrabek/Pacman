@@ -190,7 +190,7 @@ bool Ghost::canMaintainCurrentDirection(const QRegion &walls, const QRegion &gat
 }
 
 void Ghost::loadSprites() {
-    QString path("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/");
+    QString path(CUR_PATH);
     switch (color) {
         case PINK:
             path.append("pink");
@@ -207,9 +207,10 @@ void Ghost::loadSprites() {
         default:
             break;
     }
+    path.append(".png");
     sprites[ATTACK].load(path);
-    sprites[RETREAT].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/eyes.png");
-    sprites[RUN].load("/Volumes/DATA/OneDrive/IFE Computer Science/Semester 3/OOPC/Task8_Pacman/grey.png");
+    sprites[RETREAT].load(QString(CUR_PATH).append("eyes.png"));
+    sprites[RUN].load(QString(CUR_PATH).append("grey.png"));
 }
 
 void Ghost::prepareDeployment() {
