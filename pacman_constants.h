@@ -5,7 +5,7 @@
 #ifndef TASK8_PACMAN_PACMAN_CONSTANTS_H
 #define TASK8_PACMAN_PACMAN_CONSTANTS_H
 
-#define CUR_PATH "/Users/andys/Desktop/Task8_Pacman/"
+#define CUR_PATH "assets/"
 
 #define CELL_WIDTH 25
 #define GRAY_OFFSET 100

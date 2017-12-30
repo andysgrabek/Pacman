@@ -5,11 +5,13 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_CXX_FLAGS "-Wall -pedantic -Werror")
 
-set(SOURCE_FILES main.cpp map.txt PacmanBoard.cpp PacmanBoard.h MovingSprite.cpp MovingSprite.h Ghost.cpp Ghost.h Pacman.cpp Pacman.h pacman_constants.h Counter.cpp Counter.h)
+set(SOURCE_FILES main.cpp assets/map.txt PacmanBoard.cpp PacmanBoard.h MovingSprite.cpp MovingSprite.h Ghost.cpp Ghost.h Pacman.cpp Pacman.h pacman_constants.h Counter.cpp Counter.h)
 
 set(CMAKE_AUTOMOC ON)
 
 find_package(Qt5Widgets REQUIRED)
+
+file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 
 add_executable(Task8_Pacman ${SOURCE_FILES})
 

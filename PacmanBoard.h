@@ -27,8 +27,8 @@ public slots:
     void changePacmanMouth();
 
 signals:
-    void scoreIncreased(int value);
-    void textChanged(QString text);
+    void scoreIncreased(int value) __unused;
+    void textChanged(QString text) __unused;
 
 protected:
     void paintEvent(QPaintEvent *event) override;
