@@ -98,33 +98,32 @@ void Ghost::resolveDirection(const std::vector<std::pair<short, short>> &vector,
 
 void Ghost::calculatePossibleDirections(std::list<std::pair<short, short>> &possibleDirections, const QRegion &walls,
                                         const QRegion &gate) {
-    possibleDirections.insert(possibleDirections.begin(), DOWN_PAIR);
-    possibleDirections.insert(possibleDirections.begin(), RIGHT_PAIR);
-    possibleDirections.insert(possibleDirections.begin(), UP_PAIR);
-    possibleDirections.insert(possibleDirections.begin(), LEFT_PAIR);
+    for (auto& dir: DIRECTION_PAIRS) {
+        possibleDirections.emplace_front(dir);
+    }
+
     possibleDirections.remove({currentDirection.first * -1, currentDirection.second * -1});
 
-    QRegion r;
+    QRegion r = determineCollisionRegionBasedOnMode(walls, gate);
+
+    removeImpossibleDirections(possibleDirections, r);
+}
+
+void Ghost::removeImpossibleDirections(std::list<std::pair<short, short>> &possibleDirections, const QRegion &r) const {
+    for (auto i = possibleDirections.begin(); i != possibleDirections.end();) {
+        auto rv = i;
+        i++;
+        QRect t = translated(rv->first, rv->second);
+        if (r.intersects(t))
+            possibleDirections.remove(*rv);
+    }
+}
+
+QRegion Ghost::determineCollisionRegionBasedOnMode(const QRegion &walls, const QRegion &gate) const {
     if (mode == EXIT || mode == RETREAT)
-        r = walls;
+        return walls;
     else
-        r = walls.united(gate);
-
-    QRect t = translated(DOWN_PAIR.first, DOWN_PAIR.second);
-    if (r.intersects(t))
-        possibleDirections.remove(DOWN_PAIR);
-
-    t = translated(RIGHT_PAIR.first, RIGHT_PAIR.second);
-    if (r.intersects(t))
-        possibleDirections.remove(RIGHT_PAIR);
-
-    t = translated(UP_PAIR.first, UP_PAIR.second);
-    if (r.intersects(t))
-        possibleDirections.remove(UP_PAIR);
-
-    t = translated(LEFT_PAIR.first, LEFT_PAIR.second);
-    if (r.intersects(t))
-        possibleDirections.remove(LEFT_PAIR);
+        return walls.united(gate);
 }
 
 bool Ghost::findDirection(std::list<std::pair<short, short>> &possibleDirections, std::pair<short, short> dir) {

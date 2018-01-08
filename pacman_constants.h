@@ -28,6 +28,7 @@
 #define RIGHT_PAIR std::pair<short, short>(1, 0)
 #define UP_PAIR std::pair<short, short>(0, -1)
 #define DOWN_PAIR std::pair<short, short>(0, 1)
+#define DIRECTION_PAIRS { LEFT_PAIR, RIGHT_PAIR, UP_PAIR, DOWN_PAIR }
 #define NONE_PAIR std::pair<short, short>(0, 0)
 
 #define EXIT_SQUARE {350, 275}

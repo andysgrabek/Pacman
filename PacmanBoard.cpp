@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <QCoreApplication>
 #include "PacmanBoard.h"
 
 PacmanBoard::PacmanBoard(QWidget __unused *parent): pacman(QRect(), YELLOW) {
@@ -58,9 +59,9 @@ void PacmanBoard::drawDot(QPainter &p, const QRect &bigDot, QColor color, int th
 
 void PacmanBoard::loadGame() {
     try {
-        std::ifstream file(std::string(CUR_PATH).append("map.txt"));
+        std::ifstream file(std::string(CUR_PATH).append("gameMap.txt"));
         for (std::string n; file >> n;)
-            map.push_back(n);
+            gameMap.push_back(n);
         file.close();
     }
     catch (...) {
@@ -81,9 +82,9 @@ void PacmanBoard::moveSprites() {
 
 void PacmanBoard::addObjects() {
     clearGame();
-    for (unsigned int column = 0; column < map.at(0).size(); ++column) {
-        for (unsigned int row = 0; row < map.size(); ++row) {
-            switch (map[row][column]) {
+    for (unsigned int column = 0; column < gameMap.at(0).size(); ++column) {
+        for (unsigned int row = 0; row < gameMap.size(); ++row) {
+            switch (gameMap[row][column]) {
                 case '0':
                     walls = walls.united(QRect(STANDARD_CELL));
                     break;
@@ -141,7 +142,7 @@ void PacmanBoard::keyPressEvent(QKeyEvent *event) {
             pacman.setNextDirection(RIGHT_PAIR);
             break;
         case Qt::Key_Escape:
-            exit(1);
+            QCoreApplication::quit();
         case Qt::Key_Return:
             if (!gameTimer->isActive())
                 startNewGame();
@@ -225,7 +226,6 @@ void PacmanBoard::checkVictoryCondition() {
             if (pacman.canBeEaten && ghost.mode != RETREAT) {
                 gameTimer->stop();
                 emit textChanged(QString(LOST_TEXT));
-                //exit(3);
             }
             else {
                 ghost.startRetreat();

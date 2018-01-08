@@ -43,7 +43,7 @@ private:
     QRegion gate;
     std::vector<Ghost> ghosts;
     Pacman pacman;
-    std::vector<std::string> map;
+    std::vector<std::string> gameMap;
     QTimer *gameTimer;
     QTimer *mouthTimer;
     void loadGame();

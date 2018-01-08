@@ -43,6 +43,10 @@ private:
     void restoreInitialDirection();
     void prepareDeployment();
     void findDirections(std::list<std::pair<short, short>> &possibleDirections, FD &foundDirection);
+
+    QRegion determineCollisionRegionBasedOnMode(const QRegion &walls, const QRegion &gate) const;
+
+    void removeImpossibleDirections(std::list<std::pair<short, short>> &possibleDirections, const QRegion &r) const;
 };
 
 
