@@ -3,7 +3,7 @@ project(Task8_Pacman)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXX_FLAGS "-Wall -pedantic -Werror")
+set(CMAKE_CXX_FLAGS "-std=c++17 -Wall -pedantic -Werror")
 
 set(SOURCE_FILES main.cpp assets/map.txt PacmanBoard.cpp PacmanBoard.h MovingSprite.cpp MovingSprite.h Ghost.cpp Ghost.h Pacman.cpp Pacman.h pacman_constants.h Counter.cpp Counter.h)
 

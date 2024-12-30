@@ -22,8 +22,8 @@ public slots:
     void displayText(QString text);
 
 signals:
-    void valueChanged(int newValue) __unused;
-    void textChanged(QString text) __unused;
+    void valueChanged(int newValue);
+    void textChanged(QString text);
 };
 
 #endif

@@ -73,8 +73,8 @@ void Ghost::findDirections(std::list<std::pair<short, short>> &possibleDirection
 }
 
 void Ghost::chooseRandomDirection(std::list<std::pair<short, short>> &possibleDirections) {
-    std::__1::vector<std::__1::pair<short, short>> vector {begin(possibleDirections), end(possibleDirections)};
-    shuffle(vector.begin(), vector.end(), std::__1::mt19937(std::__1::random_device()()));
+    std::vector<std::pair<short, short>> vector {begin(possibleDirections), end(possibleDirections)};
+    shuffle(vector.begin(), vector.end(), std::mt19937(std::random_device()()));
     if (vector.empty())
         nextDirection =  {currentDirection.first * -1, currentDirection.second * -1};
     else

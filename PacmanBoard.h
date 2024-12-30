@@ -19,7 +19,7 @@ class PacmanBoard: public QMainWindow {
 Q_OBJECT
 
 public:
-    explicit PacmanBoard(QWidget  __unused *parent = nullptr);
+    explicit PacmanBoard(QWidget *parent = nullptr);
     ~PacmanBoard() override;
 
 public slots:
@@ -27,8 +27,8 @@ public slots:
     void changePacmanMouth();
 
 signals:
-    void scoreIncreased(int value) __unused;
-    void textChanged(QString text) __unused;
+    void scoreIncreased(int value);
+    void textChanged(QString text);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

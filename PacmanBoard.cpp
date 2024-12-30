@@ -7,7 +7,7 @@
 #include <QCoreApplication>
 #include "PacmanBoard.h"
 
-PacmanBoard::PacmanBoard(QWidget __unused *parent): pacman(QRect(), YELLOW) {
+PacmanBoard::PacmanBoard(QWidget *parent): pacman(QRect(), YELLOW) {
     gameTimer = new QTimer(this);
     mouthTimer = new QTimer(this);
     loadGame();
@@ -59,7 +59,7 @@ void PacmanBoard::drawDot(QPainter &p, const QRect &bigDot, QColor color, int th
 
 void PacmanBoard::loadGame() {
     try {
-        std::ifstream file(std::string(CUR_PATH).append("gameMap.txt"));
+        std::ifstream file(std::string(CUR_PATH).append("map.txt"));
         for (std::string n; file >> n;)
             gameMap.push_back(n);
         file.close();
